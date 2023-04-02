@@ -1,11 +1,18 @@
 from setuptools import setup, find_packages
 
+
+with open("README.md", "r") as fh:
+    readme = fh.read()
+
+
 setup(
     name="multidirectional_graph",
-    version="0.1.1",
+    version="0.1.2",
     description="Package for plotting multidirectional graphs",
     author="Eduardo Messias de Morais",
     author_email="emdemor415@gmail.com",
+    long_description=readme,
+    long_description_content_type="text/markdown",
     packages=["multidirectional_graph"],
     package_data={
         "multidirectional_graph": [
