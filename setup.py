@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="multidirectional_graph",
-    version="0.1.1dev08",
+    version="0.1.1",
     description="Package for plotting multidirectional graphs",
     author="Eduardo Messias de Morais",
     author_email="emdemor415@gmail.com",
