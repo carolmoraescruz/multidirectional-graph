@@ -1,23 +1,16 @@
 from typing import Tuple, Dict, Optional
+from functools import reduce
+from pkg_resources import resource_filename
+import os
+
+import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.font_manager import FontProperties
-from functools import reduce
-import numpy as np
 
 
-def revdict(dictionary):
-    return dict(reversed(dictionary.items()))
-
-
-def get_rectangle_bounds(group_sizes):
-    rectangle_bounds = [(0, -0.5)]
-    for v in group_sizes.values():
-        bottom = rectangle_bounds[-1][1]
-        top = bottom + v
-        rectangle_bounds.append((bottom, top))
-
-    rectangle_bounds = rectangle_bounds[1:]
-    return rectangle_bounds
+FONT_PATH = resource_filename("multidirectional_graph", "fonts")
+TITLE_FONT_PATH = os.path.join(FONT_PATH, "Oswald", "Oswald-Regular.ttf")
+BASE_FONT_PATH = os.path.join(FONT_PATH, "SourceSerif", "SourceSerifPro-Light.ttf")
 
 
 class MultidirectionalGraph:
@@ -53,6 +46,8 @@ class MultidirectionalGraph:
         group_width: float = 1.5,
         title_fontsize: int = 9,
         background_alpha: float = 0.2,
+        title_font_path: str = TITLE_FONT_PATH,
+        base_font_path: str = BASE_FONT_PATH,
     ):
         """
         A class to create a multidirectional graph based on input data.
@@ -122,7 +117,10 @@ class MultidirectionalGraph:
             The fontsize of title
         background_alpha: float, transparency
             The transparency of background.
-
+        title_font_path: str
+            The path of title font
+        base_font_path: str
+            The path of base font
         """
         self.revert_data = revert_data
         self.data = self._set_data(data)
@@ -159,10 +157,10 @@ class MultidirectionalGraph:
         self.group_width = group_width
         self.title_fontsize = title_fontsize
         self.background_alpha = background_alpha
-        self.title_font = FontProperties(fname="fonts/Oswald/static/Oswald-Regular.ttf")
-        self.custom_font = FontProperties(
-            fname="fonts/SourceSerif/SourceSerifPro-Light.ttf"
-        )
+        self.title_font_path = title_font_path
+        self.base_font_path = base_font_path
+        self.title_font = FontProperties(fname=self.title_font_path)
+        self.base_font = FontProperties(fname=self.base_font_path)
         self.rectangle_left = self.min_x - self.category_width - self.group_width
         self.rectangle_bounds = get_rectangle_bounds(self.group_sizes)
         self.group_label_left = self.rectangle_left + 0.5 * self.group_width
@@ -219,7 +217,7 @@ class MultidirectionalGraph:
         for i, label in enumerate(ytick_labels):
             y_value = self.values[i]
             for k in self.background_bins:
-                label.set_font_properties(self.custom_font)
+                label.set_font_properties(self.base_font)
                 # label.set_color(black_color)
                 if k[0] <= y_value <= k[1]:
                     label.set_color(self.background_bins[k]["color"])
@@ -317,7 +315,7 @@ class MultidirectionalGraph:
                 self.background_bins[bin_]["title"],
                 ha="center",
                 va="center",
-                fontproperties=self.custom_font,
+                fontproperties=self.base_font,
                 fontsize=self.subheader_title_fontsize,
             )
 
@@ -358,3 +356,18 @@ class MultidirectionalGraph:
                 va="center",
                 fontproperties=self.title_font,
             )
+
+
+def revdict(dictionary):
+    return dict(reversed(dictionary.items()))
+
+
+def get_rectangle_bounds(group_sizes):
+    rectangle_bounds = [(0, -0.5)]
+    for v in group_sizes.values():
+        bottom = rectangle_bounds[-1][1]
+        top = bottom + v
+        rectangle_bounds.append((bottom, top))
+
+    rectangle_bounds = rectangle_bounds[1:]
+    return rectangle_bounds
