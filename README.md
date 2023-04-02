@@ -18,6 +18,8 @@ pip install multidirectional-graph
 Here is an example of how to use Multidirectional Graph:
 
 ```python
+from multidirectional_graph import MultidirectionalGraph
+
 data = {
     "Leitura": {
         "categ 1A": 5,
