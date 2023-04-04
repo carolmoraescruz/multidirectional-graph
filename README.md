@@ -32,7 +32,7 @@ data = {
         "categ 2C": 9,
         "categ 2D": 3,
     },
-    "Fluência": {
+    "Nome extremamente grande\nque não cabe no espaço": {
         "categ 3A": 6,
         "categ 3B": 7,
     },
@@ -42,14 +42,33 @@ data = {
     },
 }
 
+
+added_data = {
+    "categ 1A": 4,
+    "categ 1B": 5,
+    "categ 1C": 4,
+    "categ 2A": 3,
+    "categ 2B": 3,
+    "categ 2C": 7,
+    "categ 2D": 2,
+    "categ 3A": 7,
+    "categ 3B": 6,
+    "categ 4A": 3,
+    "categ 4B": 2,
+}
+
 graph = MultidirectionalGraph(
     data,
     tipo_avaliacao = "Lingua Inglesa",
     good_color="green",
-    figsize=(4,15)
+    figsize=(5.5,15)
 )
 
+graph.add_values(added_data, label="Autoavaliação")
+
 fig = graph.plot()
+
+fig.savefig("images/teste.png", dpi=100, bbox_inches='tight')
 
 ```
 
