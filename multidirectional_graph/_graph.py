@@ -21,14 +21,14 @@ class MultidirectionalGraph:
         label: str = "Avaliadores",
         linewidth: int = 2,
         revert_data: Optional[bool] = True,
-        figsize: Tuple[float] = (5, 10),
+        figsize: Tuple[float] = (5.5, 15),
         aspect_ratio: float = 2.5,
         black_color: str = "#202020",
-        odd_group_color: str = "#efeee6",
-        even_group_color: str = "#e3e0d2",
+        odd_group_color: str = "#e3e0d2",
+        even_group_color: str = "#efeee6",
         bad_color: str = "#e51951",
         bad_range: Tuple[int] = (1, 4),
-        bad_string: str = "Precisa\nde desenvolvimento",
+        bad_string: str = "Precisa de\ndesenvolvimento",
         neutral_color: str = "#f7a73b",
         neutral_range: Tuple[int] = (5, 7),
         neutral_string: str = "É adequado",
@@ -45,10 +45,13 @@ class MultidirectionalGraph:
         min_y: float = -0.5,
         category_width: float = 4.0,
         group_width: float = 2.0,
-        title_fontsize: int = 9,
+        title_fontsize: int = 11,
         background_alpha: float = 0.2,
         title_font_path: str = TITLE_FONT_PATH,
         base_font_path: str = BASE_FONT_PATH,
+        plot_base_options = dict(zorder=2),
+        scatter_base_options = dict(color="white", marker='o', zorder=3),
+        legend_displacement = (0.5, -0.06),
     ):
         """
         A class to create a multidirectional graph based on input data.
@@ -175,6 +178,9 @@ class MultidirectionalGraph:
         self.additional_values = []
         self.additional_values_labels = []
         self.additional_values_options = []
+        self.scatter_base_options = scatter_base_options
+        self.plot_base_options = plot_base_options
+        self.legend_displacement = legend_displacement
 
     def set_param(self, field, value):
         if not hasattr(self, field):
@@ -183,13 +189,15 @@ class MultidirectionalGraph:
             )
         setattr(self, field, value)
 
-    def add_values(self, new_values: Dict[str,float], label: str, **options):
+    def add_values(self, new_values: Dict[str,float], label: str, linewidth: int = 2, color: str = "blue", **options):
 
         additional_values = []
         for cat in self.categories:
             if cat not in new_values:
                 raise ValueError(f"You have to pass the value of the category {cat}")
             additional_values.append(new_values[cat])
+
+        options.update(dict(linewidth=linewidth, color=color))
 
         self.additional_values.append(additional_values)
         self.additional_values_labels.append(label)
@@ -201,11 +209,23 @@ class MultidirectionalGraph:
         self.ax = plt.subplot(111, aspect=self.aspect_ratio)
         self._configure_axis(self.ax)
 
-        self.ax.plot(self.values, self.categories, color=self.black_color, linewidth=2)
+        self.ax.plot(self.values, self.categories, color=self.black_color, label=self.label, linewidth=self.linewidth, **self.plot_base_options)
+        self.ax.scatter(self.values, self.categories, edgecolor=self.black_color, linewidth=self.linewidth, **self.scatter_base_options)
+
         self._plot_additional_values(self.ax)
 
         self._set_limits(self.ax)
         self._set_y_ticks_colors(self.ax)
+
+        self.ax.legend(
+            loc='lower center',
+            bbox_to_anchor=self.legend_displacement,
+            ncol=2,
+            frameon=False,
+            borderaxespad=-0.1,
+            prop=self.base_font,
+        )
+        self.fig.tight_layout()
 
         return self.fig
     
@@ -214,6 +234,7 @@ class MultidirectionalGraph:
             opt = self.additional_values_options[i]
             label = self.additional_values_labels[i]
             ax.plot(value_list, self.categories, label=label, **opt)
+            ax.scatter(value_list, self.categories, edgecolor=opt["color"], linewidth=opt["linewidth"], **self.scatter_base_options)
 
     def _eval_group_mean(self):
         return {group: "{:.2f}".format(np.mean(list(self.data[group].values()))) for group in self.data}
@@ -224,7 +245,8 @@ class MultidirectionalGraph:
         self._add_title(ax)
         self._set_background(ax)
         self._set_category_axis(ax)
-        ax.grid()
+        ax.grid(zorder=1)
+
 
     def _set_limits(self, ax):
         ax.set_xlim([self.min_x, self.max_x])
@@ -247,11 +269,23 @@ class MultidirectionalGraph:
         ytick_labels = ax.get_yticklabels()
         for i, label in enumerate(ytick_labels):
             y_value = self.values[i]
-            for k in self.background_bins:
-                label.set_font_properties(self.base_font)
-                # label.set_color(black_color)
-                if k[0] <= y_value <= k[1]:
-                    label.set_color(self.background_bins[k]["color"])
+
+            colors = {k[0]: self.background_bins[k]["color"]  for k in self.background_bins}
+            label.set_font_properties(self.base_font)                
+
+            if 1 <= y_value <= 4:
+                label.set_color(colors[1])
+            elif 5 <= y_value <= 7:
+                label.set_color(colors[5])
+            elif 8 <= y_value <= 9:
+                label.set_color(colors[8])
+            
+            # To-Do: not working
+            # for k in self.background_bins:
+            #     label.set_font_properties(self.base_font)
+            #     # label.set_color(black_color)
+            #     if k[0] <= y_value <= k[1]:
+            #         label.set_color(self.background_bins[k]["color"])
 
     def _set_data(self, data):
         if self.revert_data:
@@ -294,6 +328,20 @@ class MultidirectionalGraph:
 
     def _add_title(self, ax):
         self._set_title()
+
+        skills_width = self.category_width + self.group_width
+        left_plot = self.min_x-skills_width
+
+        ax.text(
+            self.min_x-self.category_width/2,
+            self.max_y + self.subheader_height/2,
+            "HABILIDADES",
+            ha="center",
+            va="center",
+            fontproperties=self.title_font,
+            fontsize=self.subheader_title_fontsize,
+        )
+
         ax.text(
             np.mean((self.min_x, self.max_x)),
             self.max_y + self.subheader_height + self.header_height / 2,
@@ -306,17 +354,39 @@ class MultidirectionalGraph:
 
         ax.add_patch(
             plt.Rectangle(
-                (self.min_x, self.max_y + self.subheader_height),
-                self.max_x - self.min_x,
-                self.header_height,
+                (self.min_x-self.category_width, self.max_y),
+                self.max_x - self.min_x+self.category_width,
+                self.subheader_height,
                 facecolor=self.header_color,
                 clip_on=False,
                 linewidth=0,
             )
         )
 
+        ax.add_patch(
+            plt.Rectangle(
+                (self.min_x, self.max_y),
+                self.max_x - self.min_x,
+                self.header_height+self.subheader_height,
+                facecolor=self.header_color,
+                clip_on=False,
+                linewidth=0,
+            )
+        )
+
+        ax.add_line(
+            plt.Line2D(
+                [self.min_x-self.category_width,self.max_x], 
+                [self.max_y,self.max_y],
+                clip_on=False,
+                color=self.black_color,
+                linewidth=0.5,
+            )
+        )
+
     def _set_background(self, ax):
-        for bin_ in self.background_bins:
+
+        for i, bin_ in enumerate(self.background_bins):
             ax.add_patch(
                 plt.Rectangle(
                     (bin_[0] - 0.5, self.min_y),
@@ -329,14 +399,25 @@ class MultidirectionalGraph:
                 )
             )
 
-            ax.add_patch(
-                plt.Rectangle(
-                    (bin_[0] - 0.5, self.max_y),
-                    bin_[1] - bin_[0] + 1,
-                    self.subheader_height,
-                    facecolor=self.subheader_color,
+            # ax.add_patch(
+            #     plt.Rectangle(
+            #         (bin_[0] - 0.5, self.max_y),
+            #         bin_[1] - bin_[0] + 1,
+            #         self.subheader_height,
+            #         facecolor=self.subheader_color,
+            #         clip_on=False,
+            #         linewidth=0,
+            #     )
+            # )
+
+            ax.add_line(
+                plt.Line2D(
+                    [bin_[0] - 0.5,bin_[0] - 0.5], 
+                    [self.max_y,self.max_y+self.subheader_height],
                     clip_on=False,
-                    linewidth=0,
+                    color=self.black_color,
+                    # alpha=0.5,
+                    linewidth=0.5,
                 )
             )
 
@@ -386,6 +467,7 @@ class MultidirectionalGraph:
                 ha="center",
                 va="center",
                 fontproperties=self.title_font,
+                fontsize=int(0.85*self.title_fontsize),
             )
 
 
