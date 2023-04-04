@@ -273,11 +273,11 @@ class MultidirectionalGraph:
             colors = {k[0]: self.background_bins[k]["color"]  for k in self.background_bins}
             label.set_font_properties(self.base_font)                
 
-            if 1 <= y_value <= 4:
+            if 1 <= y_value < 4.5:
                 label.set_color(colors[1])
-            elif 5 <= y_value <= 7:
+            elif 4.5 <= y_value < 7.5:
                 label.set_color(colors[5])
-            elif 8 <= y_value <= 9:
+            elif 7.5 <= y_value <= 9:
                 label.set_color(colors[8])
             
             # To-Do: not working
