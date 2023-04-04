@@ -167,6 +167,9 @@ class MultidirectionalGraph:
         self.group_label_y = [np.mean(x) for x in self.rectangle_bounds]
         self._set_group_colors()
         self._set_background_bins()
+        self.additional_values = []
+        self.additional_values_labels = []
+        self.additional_values_options = []
 
     def set_param(self, field, value):
         if not hasattr(self, field):
@@ -175,17 +178,37 @@ class MultidirectionalGraph:
             )
         setattr(self, field, value)
 
+    def add_values(self, new_values: Dict[str,float], label: str, **options):
+
+        additional_values = []
+        for cat in self.categories:
+            if cat not in new_values:
+                raise ValueError(f"You have to pass the value of the category {cat}")
+            additional_values.append(new_values[cat])
+
+        self.additional_values.append(additional_values)
+        self.additional_values_labels.append(label)
+        self.additional_values_options.append(options)
+
+
     def plot(self):
         self.fig = plt.figure(figsize=self.figsize)
         self.ax = plt.subplot(111, aspect=self.aspect_ratio)
         self._configure_axis(self.ax)
 
         self.ax.plot(self.values, self.categories, color=self.black_color, linewidth=2)
+        self._plot_additional_values(self.ax)
 
         self._set_limits(self.ax)
         self._set_y_ticks_colors(self.ax)
 
         return self.fig
+    
+    def _plot_additional_values(self, ax):
+        for i, value_list in enumerate(self.additional_values):
+            opt = self.additional_values_options[i]
+            label = self.additional_values_labels[i]
+            ax.plot(value_list, self.categories, label=label, **opt)
 
     def _configure_axis(self, ax):
         self._set_frame_color(ax)
