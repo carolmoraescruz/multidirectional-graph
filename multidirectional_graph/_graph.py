@@ -26,15 +26,18 @@ class MultidirectionalGraph:
         black_color: str = "#202020",
         odd_group_color: str = "#e3e0d2",
         even_group_color: str = "#efeee6",
-        bad_color: str = "#e51951",
+        bad_color: str = "#f5e8e3",
         bad_range: Tuple[int] = (1, 4),
         bad_string: str = "Precisa de\ndesenvolvimento",
-        neutral_color: str = "#f7a73b",
+        bad_font_color: str = "#c22626",
+        neutral_color: str = "#f5f0e0",
         neutral_range: Tuple[int] = (5, 7),
         neutral_string: str = "É adequado",
-        good_color: str = "#0393e2",
+        neutral_font_color: str = "#e69138",
+        good_color: str = "#f5fdf9",
         good_range: Tuple[int] = (8, 9),
         good_string: str = "É alto",
+        good_font_color: str = "#3d8561",
         header_color: str = "#e3e0d2",
         header_height: float = 0.6,
         subheader_color: str = "#efeee6",
@@ -46,7 +49,7 @@ class MultidirectionalGraph:
         category_width: float = 4.0,
         group_width: float = 2.0,
         title_fontsize: int = 11,
-        background_alpha: float = 0.2,
+        background_alpha: float = 1,
         title_font_path: str = TITLE_FONT_PATH,
         base_font_path: str = BASE_FONT_PATH,
         plot_base_options = dict(zorder=2),
@@ -181,6 +184,9 @@ class MultidirectionalGraph:
         self.scatter_base_options = scatter_base_options
         self.plot_base_options = plot_base_options
         self.legend_displacement = legend_displacement
+        self.bad_font_color = bad_font_color
+        self.neutral_font_color = neutral_font_color
+        self.good_font_color = good_font_color
 
     def set_param(self, field, value):
         if not hasattr(self, field):
@@ -274,11 +280,11 @@ class MultidirectionalGraph:
             label.set_font_properties(self.base_font)                
 
             if 1 <= y_value < 4.5:
-                label.set_color(colors[1])
+                label.set_color(self.bad_font_color )
             elif 4.5 <= y_value < 7.5:
-                label.set_color(colors[5])
+                label.set_color(self.neutral_font_color)
             elif 7.5 <= y_value <= 9:
-                label.set_color(colors[8])
+                label.set_color(self.good_font_color)
             
             # To-Do: not working
             # for k in self.background_bins:
