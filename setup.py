@@ -7,7 +7,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name="multidirectional_graph",
-    version="0.1.2",
+    version="0.1.5",
     description="Package for plotting multidirectional graphs",
     author="Eduardo Messias de Morais",
     author_email="emdemor415@gmail.com",
