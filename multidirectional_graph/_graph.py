@@ -18,6 +18,7 @@ class MultidirectionalGraph:
         self,
         data: Dict[str, Dict[str, float]],
         tipo_avaliacao: str,
+        label: str = "Avaliadores",
         linewidth: int = 2,
         revert_data: Optional[bool] = True,
         figsize: Tuple[float] = (5, 10),
@@ -43,7 +44,7 @@ class MultidirectionalGraph:
         max_x: float = 9.5,
         min_y: float = -0.5,
         category_width: float = 4.0,
-        group_width: float = 1.5,
+        group_width: float = 2.0,
         title_fontsize: int = 9,
         background_alpha: float = 0.2,
         title_font_path: str = TITLE_FONT_PATH,
@@ -61,6 +62,8 @@ class MultidirectionalGraph:
             values to be plotted in the graph.
         tipo_avaliacao : str
             The type of evaluation for the input data.
+        label: str
+            Label of main graph
         linewidth : int, optional
             The width of the lines in the graph, by default 2.
         revert_data : bool, optional
@@ -125,6 +128,7 @@ class MultidirectionalGraph:
         self.revert_data = revert_data
         self.data = self._set_data(data)
         self.tipo_avaliacao = tipo_avaliacao
+        self.label = label
         self.linewidth = linewidth
         self.figsize = figsize
         self.aspect_ratio = aspect_ratio
@@ -167,6 +171,7 @@ class MultidirectionalGraph:
         self.group_label_y = [np.mean(x) for x in self.rectangle_bounds]
         self._set_group_colors()
         self._set_background_bins()
+        self.group_mean = self._eval_group_mean()
         self.additional_values = []
         self.additional_values_labels = []
         self.additional_values_options = []
@@ -210,6 +215,9 @@ class MultidirectionalGraph:
             label = self.additional_values_labels[i]
             ax.plot(value_list, self.categories, label=label, **opt)
 
+    def _eval_group_mean(self):
+        return {group: "{:.2f}".format(np.mean(list(self.data[group].values()))) for group in self.data}
+ 
     def _configure_axis(self, ax):
         self._set_frame_color(ax)
         self._set_x_ticks(ax)
@@ -373,7 +381,7 @@ class MultidirectionalGraph:
             ax.text(
                 self.group_label_left,
                 self.group_label_y[i],
-                group.upper(),
+                group.upper()+f"\n({self.group_mean[group]})",
                 rotation="vertical",
                 ha="center",
                 va="center",
